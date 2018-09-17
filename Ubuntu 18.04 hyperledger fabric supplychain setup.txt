@@ -1,0 +1,71 @@
+1a) install pre-requests
+--------------------
+sudo apt-get install curl
+sudo apt-get install golang-go
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
+sudo apt-get install nodejs
+sudo apt-get install npm
+sudo apt-get install python
+sudo apt-get install docker
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update
+sudo apt-cache policy docker-ce
+sudo apt-get install -y docker-ce
+sudo apt-get install docker-compose
+sudo npm install -g composer-cli@0.20.0
+sudo npm install -g composer-rest-server@0.20.0
+sudo npm install -g generator-hyperledger-composer@0.20.0
+npm install -g yo
+
+1b) Install VSCode from this URL: https://code.visualstudio.com/download
+Open VSCode, go to Extensions, then search for and install the Hyperledger Composer extension from the Marketplace.
+
+2)install fabric
+----------------
+mkdir ~/fabric-tools && cd ~/fabric-tools
+curl -O https://raw.githubusercontent.com/hyperledger/composer-tools/master/packages/fabric-dev-servers/fabric-dev-servers.zip
+unzip fabric-dev-servers.zip
+--sudo ./downloadFabric.sh
+
+3)Operate Fabric
+--------------------
+cd /fabric-tools
+sudo ./startFabric.sh
+sudo ./createPeerAdminCard.sh
+
+sudo ./stopFabric.sh
+sudo ./teardownFabric.sh
+Note that if you've run the teardown script, the next time you start the runtime, you'll need to create a new PeerAdmin card just like you did on first time startup
+
+
+4) create skeleton for the business netweok - e.g Supplychain-network
+------------------------------------------
+yo hyperledger-composer:businessnetwork
+
+
+5a) Deploying the business network - e.g Supplychain-network
+------------------------------------------------------------
+sudo composer archive create --sourceType dir --sourceName . -a ./dist/supplychain-network.bna
+sudo composer network install --card PeerAdmin@hlfv1 --archiveFile  ./dist/supplychain-network.bna
+sudo composer network start --card PeerAdmin@hlfv1 --networkAdmin admin --networkAdminEnrollSecret adminpw --file networkadmin.card --networkName supplychain-network --networkVersion 0.0.1
+sudo composer card import --file networkadmin.card
+5b) Validate business network
+sudo composer network ping --card admin@supplychain-network
+sudo composer identity list --card admin@supplychain-network
+
+6) Invoke Playground
+-----------------------
+sudo composer-playground
+http://localhost:8080/login
+
+7) start rest server
+------------------------
+sudo composer-rest-server -c admin@supplychain-network -n never -w true
+---https://hyperledger.github.io/composer/latest/tutorials/developer-tutorial
+http://localhost:3000/login
+8) Create Angular
+-----------------------
+sudo yo hyperledger-composer:angular
+http://localhost:4200/login

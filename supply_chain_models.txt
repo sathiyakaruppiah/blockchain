@@ -1,0 +1,75 @@
+namespace org.acme.supplychain
+
+abstract participant Business identified by bizid{
+  o String bizid
+  o String name
+  o String address
+}
+
+participant Manufacturer extends Business {
+}
+
+
+participant Consumer extends Business {
+
+}
+
+participant Shipper extends Business {
+
+}
+
+asset Product identified by productId {
+  o String productId
+  o String productName
+  o String uom
+  o String mfgId
+  o Double mfgCost
+  o Double sellingPrice
+  o Long balanceQty
+ }
+
+
+asset Replenish identified by repid {
+  o String repid
+  --> Product product 
+  --> Manufacturer manufacturer
+  o String warehouseLocation 
+  o DateTime replenishDateTime
+  o Long replenishQty
+}
+
+asset Order identified by ordid {
+  o String ordid
+  --> Product product 
+  --> Consumer consumer
+  o DateTime orderDateTime
+  o Long orderQty
+  o Double salesAmt
+}
+
+asset Shipment identified by soid {
+  o String soid
+  //--> Order order
+  //--> Product product
+ // --> Consumer consumer
+  o DateTime shipmentDateTime
+  o Long shipmentQty
+}
+
+
+abstract transaction ReplenishTransaction {
+  o Replenish replenish
+}
+transaction StockReplenish extends ReplenishTransaction {
+}
+
+abstract transaction OrderTransaction {
+  o Order order
+
+}
+
+transaction ConsumerOrder extends OrderTransaction {
+}
+
+transaction xSetupDemo  {
+}

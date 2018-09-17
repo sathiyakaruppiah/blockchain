@@ -1,0 +1,106 @@
+/**
+ * A Replenish has been raised
+ * @param {org.acme.supplychain.StockReplenish} stockReplenish - the StockReplenishtransaction
+ * @transaction
+ */
+async function stockReplenish(stockReplenish) {  
+    const NS = 'org.acme.supplychain';
+    const replenish = stockReplenish.replenish;
+    
+  
+       // add the Replenish
+    const replenishRegistry = await getAssetRegistry(NS + '.Replenish');
+    await replenishRegistry.addAll([replenish]);
+   
+  // add qty at item
+   replenish.product.balanceQty += replenish.replenishQty;  
+   const productRegistry = await getAssetRegistry(NS + '.Product');
+    await productRegistry.update(replenish.product);
+ }
+
+/**
+ * A Consumer order has been raised
+ * @param {org.acme.supplychain.ConsumerOrder} consumerOrder - the ConsumerOrdertransaction
+ * @transaction
+ */
+async function consumerOrder(consumerOrder) {  
+    const factory = getFactory();
+    const NS = 'org.acme.supplychain';
+    const order = consumerOrder.order;
+    order.salesAmt =  order.product.sellingPrice * order.orderQty;    
+  
+       // add  Consumer Order
+    const orderRegistry = await getAssetRegistry(NS + '.Order');
+    await orderRegistry.addAll([order]);
+  
+  
+    // deduct qty at product
+   order.product.balanceQty -= order.orderQty;  
+    
+  
+  const productRegistry = await getAssetRegistry(NS + '.Product');
+    await productRegistry.update(order.product);
+  /**
+  const shipment = factory.newResource(NS, 'Shipment', order.ordId );
+    shipment.shipmentQty = 0;
+    shipment.shipmentDateTime = new Date();
+  const shipmentRegistry = await getParticipantRegistry(NS + '.Shipment');
+    await consumerRegistry.addAll([shipment]); */
+    
+ }
+
+
+/**
+ * Initialize some test assets and participants useful for running a demo.
+ * @param {org.acme.supplychain.xSetupDemo} xsetupDemo - the SetupDemo transaction
+ * @transaction
+ */
+async function xsetupDemo(xsetupDemo) {  // eslint-disable-line no-unused-vars
+
+    const factory = getFactory();
+    const NS = 'org.acme.supplychain';
+
+    // create the manufacturer
+    const manufacturer = factory.newResource(NS, 'Manufacturer', 'MFG2');
+    manufacturer.name = 'Apple Inc';
+    manufacturer.address = 'USA';
+  
+    // create the consumer
+    const consumer = factory.newResource(NS, 'Consumer', 'CON2');
+    consumer.name = 'Singtel';
+    consumer.address = 'Singapore';
+  
+    // create the shipper
+    const shipper = factory.newResource(NS, 'Shipper', 'SHI2');
+    shipper.name = 'FeDEx';
+    shipper.address = 'Singapore';
+  
+    // create the product
+    const product = factory.newResource(NS, 'Product', 'PRD2');
+    product.productName = 'Apple iPhone X';
+    product.uom = 'PCS';
+    product.mfgId='MFG1';
+    product.mfgCost=10;
+    product.sellingPrice=20;
+    product.balanceQty=0;
+
+    
+
+    // add the manufacturer
+    const manufacturerRegistry = await getParticipantRegistry(NS + '.Manufacturer');
+    await manufacturerRegistry.addAll([manufacturer]);
+
+    // add the consumer
+    const consumerRegistry = await getParticipantRegistry(NS + '.Consumer');
+    await consumerRegistry.addAll([consumer]);
+    
+  // add the consumer
+    const shipperRegistry = await getParticipantRegistry(NS + '.Shipper');
+    await shipperRegistry.addAll([shipper]);
+  
+     // add the product
+    const productRegistry = await getAssetRegistry(NS + '.Product');
+    await productRegistry.addAll([product]);
+
+}
+
